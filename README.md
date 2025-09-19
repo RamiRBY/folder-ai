@@ -15,8 +15,8 @@ This project provides a logical, step-by-step folder hierarchy that acts as a ro
 
 The project is divided into two main components:
 
-* **`folderai-service` (Backend):** A Spring Boot application that uses **Spring AI** to connect with large language models. It manages conversation context with `ChatMemory` and exposes a simple REST API to generate the directory structure. **(Status: Complete ✅)**
-* **`folderai-web` (Frontend):** A Vue.js 3 application that will provide a user-friendly chat interface to interact with the backend service. **(Status: Not Started / Help Wanted 🙋‍♀️)**
+* **`folderai-service` (Backend):** A Spring Boot application that uses **Spring AI** to connect with large language models. It manages conversation context with `ChatMemory` and exposes a simple REST API to generate the directory structure. **(Status: Ongoing)**
+* **`folderai-web` (Frontend):** A Vue.js 3 application that will provide a user-friendly chat interface to interact with the backend service. **(Status: Ongoing)**
 
 The two services communicate via a RESTful API. The frontend sends a user's prompt to the backend, which then returns the generated folder structure for display.
 
