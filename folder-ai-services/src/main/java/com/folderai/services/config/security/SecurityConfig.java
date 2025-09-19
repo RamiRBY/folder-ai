@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Security configuration for the Scaffold AI application. This class configures CORS and disables
+ * Security configuration for the Folder AI application. This class configures CORS and disables
  * CSRF protection, which is standard for stateless REST APIs consumed by modern frontend
  * applications.
  */

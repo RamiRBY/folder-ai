@@ -1,0 +1,87 @@
+# This workflow tests, builds, and pushes the backend service Docker image.
+
+name: CI - Test, Build, and Push Backend Service
+
+on:
+  push:
+    # We will eventually change this to 'develop' and 'main'
+    branches: [ "develop", "main" ]
+    paths:
+      - 'folder-ai-services/**'
+  pull_request:
+    branches: [ "develop", "main" ]
+    paths:
+      - 'folder-ai-services/**'
+
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Run fast unit tests. This gives quick feedback.
+  unit-test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 with Maven Cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Unit Tests with Maven
+        # We explicitly exclude both Integration and Arch tests to keep this job focused.
+        run: mvn -B test "-Dsurefire.excludes=**/*IntegrationTest.java,**/*ArchTest.java"
+        working-directory: ./folder-ai-services
+
+  # Job 2: Run architecture tests in parallel with unit tests.
+  architecture-test:
+    name: Run Architecture Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 with Maven Cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Architecture Tests with Maven
+        # We use 'surefire.includes' to ONLY run the architecture tests in this job.
+        run: mvn -B test -Dsurefire.includes=**/*ArchTest.java
+        working-directory: ./folder-ai-services
+
+
+  # Job 3: Run slower integration tests. This job only runs if unit and arch tests pass.
+  integration-test:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    # This 'needs' keyword creates a dependency. This job won't start until BOTH preceding jobs succeed.
+    needs: [unit-test, architecture-test]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 with Maven Cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Integration Tests with Maven
+        # The 'verify' phase runs all lifecycle steps, including the 'integration-test' phase.
+        # This is where the Failsafe plugin (standard for ITs) runs.
+        run: mvn -B verify
+        working-directory: ./folder-ai-services
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: folder-ai-services/target/site/jacoco/

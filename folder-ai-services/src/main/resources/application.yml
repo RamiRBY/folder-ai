@@ -21,7 +21,6 @@ logging:
     # Keep the default level for everything else at INFO
     #root: INFO
     # Set the level specifically for your service package to DEBUG
-    #io.scaffoldai.services.service: DEBUG
 
     # Sets the level for ALL loggers to DEBUG
     #root: DEBUG
