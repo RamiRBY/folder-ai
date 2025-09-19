@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The main REST controller for the Scaffold AI application. This class handles all incoming API
- * requests related to project scaffolding.
+ * The main REST controller for the Folder AI application. This class handles all incoming API
+ * requests related to project directory generation.
  */
 @RestController
 @RequestMapping("/api/v1/folders")
@@ -28,8 +28,8 @@ public class FolderController {
 
   @Operation(summary = "Analyze prompt and return project directory",
       description = "Receives a chat prompt and returns a structured representation of folders to be generated.")
-  @PostMapping("/project-structure")
-  public ResponseEntity<FolderResponse> generateProjectStructure(
+  @PostMapping("/project-directory")
+  public ResponseEntity<FolderResponse> generateProjectDirectory(
       @RequestBody FolderRequest folderRequest) {
     log.info("Received request to generate project structure, prompt : {}",
         folderRequest.prompt());

@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Implementation of the ScaffoldService interface. This class contains the core logic for
+ * Implementation of the FolderService interface. This class contains the core logic for
  * interacting with the AI model to generate project structures.
  */
 @Service
@@ -53,19 +53,18 @@ public class FolderServiceImpl implements FolderService {
         var converter = new BeanOutputConverter<>(DirectoryStructure.class);
         var prompt = promptFactory.createStructurePrompt(folderRequest.prompt(),
             converter.getFormat());
-        log.info("Project directory: Calling AI model for prompt ID: {}", conversationId);
+        log.info("Project directory: Calling AI model for conversationId: {}", conversationId);
         return callAiModel(prompt, getChatOptions(folderRequest), conversationId, converter);
       } catch (Exception e) {
-        log.error("Error during folder generation for prompt ID: {}.",
+        log.error("Error during folder generation for conversationId: {}.",
             conversationId);
 
         if (e instanceof NonTransientAiException) {
           throw new FolderGenerationException("Current quota was exceeded.", e);
 
         }
-        log.error("Error during folder generation for prompt ID: {}. Saving FAILED log.",
-            conversationId,
-            e);
+        log.error("Error during folder generation for conversationId: {}.",
+            conversationId);
         throw new FolderGenerationException("Error during folder generation", e);
       }
 
@@ -124,6 +123,5 @@ public class FolderServiceImpl implements FolderService {
         )
     );
   }
-
 
 }

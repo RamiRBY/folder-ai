@@ -2,7 +2,7 @@ package com.folderai.services.exception;
 
 
 /**
- * A custom exception for errors that occur during the scaffold generation process.
+ * A custom exception for errors that occur during the folder generation process.
  */
 public class FolderGenerationException extends RuntimeException {
 
