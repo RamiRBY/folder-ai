@@ -43,6 +43,8 @@ learn-spring/
 ├── best-practices/
 └── projects/
     ├── sample-crud-app/
-    └── microservices-demo/Output Schema
+    └── microservices-demo/
+
+Output Schema
 Your final output MUST be a single JSON object that strictly adheres to the following format.Do not include any other text, explanations, or markdown formatting outside of the JSON structure.
 {format}

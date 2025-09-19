@@ -113,8 +113,8 @@ class FolderServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw ScaffoldGenerationException when AI call fails")
-    void generateProjectDirectory_whenAiFails_thenThrowsScaffoldGenerationException() {
+    @DisplayName("should throw FolderGenerationException when AI call fails")
+    void generateProjectDirectory_whenAiFails_thenThrowsFolderGenerationException() {
       // Arrange
       when(promptFactory.createStructurePrompt(any(), any())).thenReturn(
           new Prompt("test"));
@@ -135,8 +135,8 @@ class FolderServiceImplTest {
     }
 
     @Test
-    @DisplayName("should throw ScaffoldGenerationException for other exceptions")
-    void generateProjectDirectory_whenOtherExceptionOccurs_thenThrowsScaffoldGenerationException() {
+    @DisplayName("should throw FolderGenerationException for other exceptions")
+    void generateProjectDirectory_whenOtherExceptionOccurs_thenThrowsFolderGenerationException() {
       when(promptFactory.createStructurePrompt(any(), any())).thenReturn(
           new Prompt("test"));
 
