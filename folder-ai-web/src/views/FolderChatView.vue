@@ -2,12 +2,10 @@
 import { ref, watch, nextTick } from 'vue';
 import { useFolderStore } from '@/stores/folderStore';
 
-// The Message interface is updated to handle all response types
 interface Message {
   id: number;
   sender: 'user' | 'ai' | 'error';
   content: string;
-  // Optional properties for the structured AI response
   projectName?: string;
   tree?: string;
 }
@@ -41,16 +39,14 @@ const handleSubmit = () => {
   scrollToBottom();
 };
 
-// --- New function to handle copying the generated tree ---
 const copyToClipboard = (text: string, id: number) => {
   navigator.clipboard.writeText(text);
   copiedState.value[id] = true;
   setTimeout(() => {
     copiedState.value[id] = false;
-  }, 2000); // Reset after 2 seconds
+  }, 2000); 
 };
 
-// --- Watchers ---
 
 watch(() => store.folderResult, (newResult) => {
   if (newResult) {
