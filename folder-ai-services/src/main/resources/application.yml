@@ -1,0 +1,42 @@
+spring:
+  #Spring Ai Configuration
+  profiles:
+    active: dev
+  ai:
+    openai:
+      apikey: ${OPENAI_API_KEY}
+      chat:
+        options:
+          # Default options for all chat requests.
+          # These can be overridden per request if needed in the future.
+          #model: gpt-4o
+          #model: gpt-3.5-turbo
+          temperature: 0.9 # Lower temperature for more deterministic, structured output
+          max-tokens: 6000 # Increased max tokens to handle large project structures
+  application:
+    name: folder-ai-services
+  #Spring Data MongoDbs
+logging:
+  level:
+    # Keep the default level for everything else at INFO
+    #root: INFO
+    # Set the level specifically for your service package to DEBUG
+    #io.scaffoldai.services.service: DEBUG
+
+    # Sets the level for ALL loggers to DEBUG
+    #root: DEBUG
+      springframework:
+        data:
+          # Optionally, you can also control the Spring Data MongoDB integration logging
+          # This is usually less verbose but good practice to manage as well.
+          mongodb: WARN
+# Root configuration for custom prompt properties
+prompt:
+  directory:
+    system-prompt-path: "classpath:prompts/directory/directory-system.st"
+    user-prompt-path: "classpath:prompts/directory/directory-user.st"
+
+
+
+
+
