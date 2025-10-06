@@ -1,7 +1,7 @@
 spring:
   #Spring Ai Configuration
   #profiles:
-   # active: dev
+  # active: dev
   ai:
     openai:
       apikey: ${OPENAI_API_KEY}
@@ -13,6 +13,13 @@ spring:
           #model: gpt-3.5-turbo
           temperature: 0.9 # Lower temperature for more deterministic, structured output
           max-tokens: 6000 # Increased max tokens to handle large project structures
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+      chat:
+        options:
+#          model: claude-sonnet-4-5-20250929
+#          temperature: 0.7
+          max-tokens: 4096
   application:
     name: folder-ai-services
   #Spring Data MongoDbs
@@ -24,11 +31,11 @@ logging:
 
     # Sets the level for ALL loggers to DEBUG
     #root: DEBUG
-      springframework:
-        data:
-          # Optionally, you can also control the Spring Data MongoDB integration logging
-          # This is usually less verbose but good practice to manage as well.
-          mongodb: WARN
+    springframework:
+      data:
+        # Optionally, you can also control the Spring Data MongoDB integration logging
+        # This is usually less verbose but good practice to manage as well.
+        mongodb: WARN
 # Root configuration for custom prompt properties
 prompt:
   directory:

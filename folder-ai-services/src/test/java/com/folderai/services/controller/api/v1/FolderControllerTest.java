@@ -41,7 +41,7 @@ class FolderControllerTest {
     @DisplayName("should return 200 OK")
     void shouldReturnOkWithMultipartResponse() {
       // Arrange
-      var request = new FolderRequest("Create a Java REST API", null, null);
+      var request = new FolderRequest("Create a Java REST API", null, null, null);
       var mockResult = new FolderResponse(new DirectoryStructure("java-learn", "learning "
           + "directory"), null, null);
 
@@ -56,7 +56,7 @@ class FolderControllerTest {
     @DisplayName("should return 500 Internal Server Error when service throws IOException")
     void shouldReturn500OnServiceError() {
       // Arrange
-      var request = new FolderRequest("Create a Java REST API", null, null);
+      var request = new FolderRequest("Create a Java REST API", null, null, null);
       when(folderService.generateProjectDirectory(any(FolderRequest.class))).thenThrow(
           new FolderGenerationException("Failed to create directory", new IOException()));
 

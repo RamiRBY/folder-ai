@@ -1,7 +1,7 @@
 package com.folderai.services.dto.response;
 
 /**
- * Nested record to structure metadata from the AI provider.
+ * Nested record to structure metadata from the AI aiProvider.
  *
  * @param model The model that generated the response.
  * @param usage Details on token consumption.

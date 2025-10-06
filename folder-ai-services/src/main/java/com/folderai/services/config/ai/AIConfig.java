@@ -1,12 +1,16 @@
 package com.folderai.services.config.ai;
 
+import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Spring configuration class for AI-related beans.
@@ -39,16 +43,50 @@ public class AIConfig {
   }
 
   /**
-   * Creates and configures a ChatClient bean for the application. Spring AI provides a
-   * pre-configured ChatClient.Builder that we can use to build the final ChatClient instance.
+   * Creates a ChatClient specifically for OpenAI.
    *
-   * @param builder    The ChatClient.Builder provided by the Spring AI auto-configuration.
-   * @param chatMemory The ChatMemory bean.
-   * @return A configured ChatClient bean ready for injection.
+   * @param openAiChatModel The OpenAI ChatModel auto-configured by Spring AI
+   * @param chatMemory The ChatMemory bean
+   * @return A configured ChatClient for OpenAI
    */
   @Bean
-  public ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
-    return builder.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build()).build();
+  @Qualifier("openAiChatClient")
+  public ChatClient openAiChatClient(
+      OpenAiChatModel openAiChatModel,
+      ChatMemory chatMemory) {
+    return ChatClient.builder(openAiChatModel)
+        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+        .build();
+  }
+
+  /**
+   * Creates a ChatClient specifically for Anthropic Claude.
+   *
+   * @param anthropicChatModel The Anthropic ChatModel auto-configured by Spring AI
+   * @param chatMemory The ChatMemory bean
+   * @return A configured ChatClient for Anthropic Claude
+   */
+  @Bean
+  @Qualifier("anthropicChatClient")
+  public ChatClient anthropicChatClient(
+      AnthropicChatModel anthropicChatModel,
+      ChatMemory chatMemory) {
+    return ChatClient.builder(anthropicChatModel)
+        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+        .build();
+  }
+
+  /**
+   * Creates the default/primary ChatClient bean for the application.
+   * Uses OpenAI by default, but can be changed to use Anthropic.
+   *
+   * @param anthropicChatClient The Anthropic ChatClient
+   * @return The primary ChatClient bean
+   */
+  @Bean
+  @Primary
+  public ChatClient chatClient(@Qualifier("anthropicChatClient") ChatClient anthropicChatClient) {
+    return anthropicChatClient;
   }
 
 }

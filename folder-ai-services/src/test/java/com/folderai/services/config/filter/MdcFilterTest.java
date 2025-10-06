@@ -1,6 +1,6 @@
 package com.folderai.services.config.filter;
 
-import com.folderai.services.commun.FolderConstants;
+import com.folderai.services.common.FolderConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;

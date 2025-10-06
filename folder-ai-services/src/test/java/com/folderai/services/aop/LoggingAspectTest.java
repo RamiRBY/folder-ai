@@ -1,7 +1,7 @@
 package com.folderai.services.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.folderai.services.commun.FolderConstants;
+import com.folderai.services.common.FolderConstants;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.AfterEach;

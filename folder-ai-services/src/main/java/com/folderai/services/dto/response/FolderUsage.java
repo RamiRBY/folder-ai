@@ -1,7 +1,7 @@
 package com.folderai.services.dto.response;
 
 /**
- * Nested record for token usage details. Field names are mapped to common provider outputs using
+ * Nested record for token usage details. Field names are mapped to common aiProvider outputs using
  *
  * @param promptTokens     Tokens used in the prompt.
  * @param generationTokens Tokens used in the generated response.

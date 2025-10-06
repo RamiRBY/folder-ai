@@ -1,5 +1,6 @@
 package com.folderai.services.dto.request;
 
+import com.folderai.services.common.enumeration.AIProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -19,7 +20,9 @@ public record FolderRequest(
     @NotNull(message = "Prompt cannot be null.")
     String prompt,
     UUID conversationId,
-    FolderModelOptions chatOptions
+    FolderModelOptions chatOptions,
+    AIProvider aiProvider // <-- ADD THIS FIELD
+
 ) {
 
 }

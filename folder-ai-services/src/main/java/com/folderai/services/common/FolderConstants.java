@@ -1,4 +1,4 @@
-package com.folderai.services.commun;
+package com.folderai.services.common;
 
 public class FolderConstants {
 

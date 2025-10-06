@@ -12,7 +12,7 @@ import java.util.UUID;
  * @param conversationId conversationId The unique identifier for the conversation, echoed from the
  *                       request.
  * @param metaData       metadata Contains usage information (like token counts) and other metadata
- *                       from the provider.
+ *                       from the aiProvider.
  */
 
 public record FolderResponse(

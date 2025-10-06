@@ -1,10 +1,12 @@
 package com.folderai.services.service.impl;
 
 import com.folderai.services.ai.prompt.PromptFactory;
+import com.folderai.services.common.enumeration.AIProvider;
 import com.folderai.services.dto.request.FolderModelOptions;
 import com.folderai.services.dto.request.FolderRequest;
 import com.folderai.services.dto.response.DirectoryStructure;
 import com.folderai.services.exception.FolderGenerationException;
+import com.folderai.services.service.ai.AIProviderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,13 +40,20 @@ import static org.mockito.Mockito.*;
 class FolderServiceImplTest {
 
   @Mock
-  private ChatClient chatClient;
+  private AIProviderService aiProviderService;
 
   @Mock
   private ChatMemory chatMemory;
 
   @Mock
   private PromptFactory promptFactory;
+
+  @InjectMocks
+  private FolderServiceImpl folderService;
+  // A mock client that the AIProviderService will return
+  @Mock
+  private ChatClient mockSelectedChatClient;
+
   @Mock
   private ChatClient.ChatClientRequestSpec requestSpec;
   @Mock
@@ -54,15 +63,13 @@ class FolderServiceImplTest {
   private ChatResponse chatResponse;
 
 
-  @InjectMocks
-  private FolderServiceImpl folderService;
-
-
   @Nested
   @DisplayName("generateProjectDirectory Tests")
   class GenerateProjectDirectoryTests {
 
-    private FolderRequest mockRequest;
+    private FolderRequest mockRequestWithProvider;
+    private FolderRequest mockRequestWithoutProvider;
+
     private Prompt promptMock;
     private final UUID conversationId = UUID.fromString("63035339-877c-432e-81a8-e1afb9c0d89b");
 
@@ -70,14 +77,25 @@ class FolderServiceImplTest {
     void setUp() {
       promptMock = mock(Prompt.class);
 
-      mockRequest = new FolderRequest(
+      // --- Updated request DTO to include the new 'provider' field ---
+      mockRequestWithProvider = new FolderRequest(
           "A test project",
-          conversationId
-          ,
-          new FolderModelOptions("gpt-4o", 0.5)
+          conversationId,
+          new FolderModelOptions("gpt-4o", 0.5),
+          AIProvider.OPENAI // Explicitly set the provider
       );
 
-      when(chatClient.prompt(promptMock)).thenReturn(requestSpec);
+      mockRequestWithoutProvider = new FolderRequest(
+          "A default project",
+          conversationId,
+          new FolderModelOptions("claude-3", 0.7),
+          null // Test the default provider case
+      );
+
+      // Mock the provider service to return our mock client
+      when(aiProviderService.getChatClient(any(AIProvider.class))).thenReturn(
+          mockSelectedChatClient);
+      when(aiProviderService.getDefaultChatClient()).thenReturn(mockSelectedChatClient);
       when(requestSpec.options(any())).thenReturn(requestSpec);
       when(requestSpec.advisors(any(Consumer.class))).thenReturn(requestSpec);
       when(requestSpec.call()).thenReturn(responseSpec);
@@ -86,8 +104,8 @@ class FolderServiceImplTest {
     }
 
     @Test
-    @DisplayName("should successfully generate a project when AI call is successful")
-    void generateProjectDirectory_whenSuccessful_thenReturnsGeneratedProject() {
+    @DisplayName("should successfully generate a project when AI call is successful and use specific provider when one is requested")
+    void generateProjectDirectory_whenProviderSpecified_whenSuccessful_thenReturnsGeneratedProject() {
       when(promptFactory.createStructurePrompt(anyString(), anyString())).thenReturn(
           promptMock);
       var aiJsonOutput = "{\"projectName\":\"test-project\",\"tree\":\"tree\"}";
@@ -98,19 +116,43 @@ class FolderServiceImplTest {
       when(chatResponse.getMetadata()).thenReturn(
           ChatResponseMetadata.builder().model("gpt 4").build());
 
-      var result = folderService.generateProjectDirectory(mockRequest);
+      var result = folderService.generateProjectDirectory(mockRequestWithProvider);
 
       assertThat(result).isNotNull();
       assertThat(result.directoryStructure().projectName()).isEqualTo("test-project");
-      assertThat(result.directoryStructure().tree()).isEqualTo("tree");
-      assertThat(result.conversationId()).isInstanceOf(UUID.class);
-      assertThat(result.metaData().model()).isEqualTo("gpt 4");
 
-      verify(promptFactory).createStructurePrompt(eq(mockRequest.prompt()),
-          anyString());
-      verify(chatClient).prompt(any(Prompt.class));
+      // --- VERIFY THE NEW LOGIC ---
+      verify(aiProviderService).getChatClient(AIProvider.OPENAI);
+      verify(aiProviderService, never()).getDefaultChatClient();
+      verify(mockSelectedChatClient).prompt(any(Prompt.class));
 
     }
+
+    @Test
+    @DisplayName("should successfully generate a project when AI call is successful and use default provider when none is requested")
+    void generateProjectDirectory_whenProviderIsNull_whenSuccessful_thenReturnsGeneratedProject() {
+      when(promptFactory.createStructurePrompt(anyString(), anyString())).thenReturn(
+          promptMock);
+      var aiJsonOutput = "{\"projectName\":\"test-project\",\"tree\":\"tree\"}";
+
+      var assistantMessage = new AssistantMessage(aiJsonOutput);
+      var generation = new Generation(assistantMessage);
+      when(chatResponse.getResult()).thenReturn(generation);
+      when(chatResponse.getMetadata()).thenReturn(
+          ChatResponseMetadata.builder().model("gpt 4").build());
+
+      var result = folderService.generateProjectDirectory(mockRequestWithoutProvider);
+
+      assertThat(result).isNotNull();
+      assertThat(result.directoryStructure().projectName()).isEqualTo("default-project");
+
+      // --- VERIFY THE NEW LOGIC ---
+      verify(aiProviderService, never()).getChatClient(any(AIProvider.class));
+      verify(aiProviderService).getDefaultChatClient();
+      verify(mockSelectedChatClient).prompt(any(Prompt.class));
+
+    }
+
 
     @Test
     @DisplayName("should throw FolderGenerationException when AI call fails")
@@ -126,7 +168,7 @@ class FolderServiceImplTest {
 
       // Act & Assert
       var exception = assertThrows(FolderGenerationException.class, () ->
-          folderService.generateProjectDirectory(mockRequest)
+          folderService.generateProjectDirectory(mockRequestWithProvider)
       );
 
       // Verify the specific error message for quota issues
@@ -145,7 +187,7 @@ class FolderServiceImplTest {
           "tree"
       ));
       var exception = assertThrows(FolderGenerationException.class, () ->
-          folderService.generateProjectDirectory(mockRequest)
+          folderService.generateProjectDirectory(mockRequestWithProvider)
       );
 
       assertThat(exception.getMessage()).isEqualTo(

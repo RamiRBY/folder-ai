@@ -8,6 +8,7 @@ import com.folderai.services.dto.response.FolderResponse;
 import com.folderai.services.dto.response.FolderUsage;
 import com.folderai.services.exception.FolderGenerationException;
 import com.folderai.services.service.FolderService;
+import com.folderai.services.service.ai.AIProviderService;
 import com.folderai.services.util.TreeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import java.util.UUID;
 @Slf4j
 public class FolderServiceImpl implements FolderService {
 
-  private final ChatClient chatClient;
+  private final AIProviderService aiProviderService;
   private final ChatMemory chatMemory;
   private final PromptFactory promptFactory;
 
@@ -54,7 +55,14 @@ public class FolderServiceImpl implements FolderService {
         var prompt = promptFactory.createStructurePrompt(folderRequest.prompt(),
             converter.getFormat());
         log.info("Project directory: Calling AI model for conversationId: {}", conversationId);
-        return callAiModel(prompt, getChatOptions(folderRequest), conversationId, converter);
+        // --- LOGIC CHANGE ---
+        // Determine which client to use
+        ChatClient selectedChatClient = (folderRequest.aiProvider() != null)
+            ? aiProviderService.getChatClient(folderRequest.aiProvider())
+            : aiProviderService.getDefaultChatClient();
+
+        return callAiModel(selectedChatClient ,prompt, getChatOptions(folderRequest),
+            conversationId, converter);
       } catch (Exception e) {
         log.error("Error during folder generation for conversationId: {}.",
             conversationId);
@@ -86,7 +94,8 @@ public class FolderServiceImpl implements FolderService {
     return chatOptionsBuilder.build();
   }
 
-  private FolderResponse callAiModel(Prompt prompt, ChatOptions chatOptions, String conversationId,
+  private FolderResponse callAiModel(ChatClient chatClient, Prompt prompt, ChatOptions chatOptions
+      , String conversationId,
       BeanOutputConverter<DirectoryStructure> converter
   ) {
     chatMemory.add(conversationId, prompt.getUserMessage());
